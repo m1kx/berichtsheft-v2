@@ -216,8 +216,9 @@ export const getPeriodContent = async (
   auth: Auth,
   period: Period,
 ): Promise<PeriodInfo | null> => {
+  const elementId = await getElementId(auth);
   const response = await fetch(
-    `https://ajax.webuntis.com/WebUntis/api/rest/view/v2/calendar-entry/detail?elementId=35347&elementType=5&endDateTime=${
+    `https://ajax.webuntis.com/WebUntis/api/rest/view/v2/calendar-entry/detail?elementId=${elementId}&elementType=5&endDateTime=${
       encodeURI(formatDateTime(period.date, period.endTime))
     }&homeworkOption=DUE&startDateTime=${
       encodeURI(formatDateTime(period.date, period.startTime))
