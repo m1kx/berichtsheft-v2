@@ -25,17 +25,10 @@ jobs:
       - name: Build Deno executable
         run: deno task build
 
-      - name: Archive the executable
-        run: |
-          mkdir -p release
-          mv berichtsheft release/
-          tar -czvf release/berichtsheft.tar.gz -C release berichtsheft
-        shell: bash
-
       - name: Upload executable to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/berichtsheft.tar.gz
+          files: berichtsheft
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
 
