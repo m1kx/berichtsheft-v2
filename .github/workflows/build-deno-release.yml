@@ -30,11 +30,9 @@ jobs:
         shell: bash
 
       - name: Upload executable to Release
-        id: upload-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release/berichtsheft.tar.gz
           tag_name: ${{ github.ref_name }}
-          release_name: "Release ${{ github.ref_name }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: "Release ${{ github.ref_name }}"
+
