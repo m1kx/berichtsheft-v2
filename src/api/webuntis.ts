@@ -69,7 +69,6 @@ export const auth = async (): Promise<Auth> => {
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
-        "tenant-id": "90849",
         "Referer": "https://ajax.webuntis.com/WebUntis/",
         "Referrer-Policy": "strict-origin-when-cross-origin",
       },
@@ -126,7 +125,7 @@ export const auth = async (): Promise<Auth> => {
 const getElementId = async (auth: Auth): Promise<number> => {
   const response = await fetch(
     `https://ajax.webuntis.com/WebUntis/api/public/timetable/weekly/pageconfig?type=5&date=${
-      (new Date()).toLocaleDateString().split(".").reverse().join("-")
+      (new Date()).toLocaleDateString('de-DE').split(".").reverse().join("-")
     }&isMyTimetableSelected=true`,
     {
       "headers": {
@@ -141,7 +140,6 @@ const getElementId = async (auth: Auth): Promise<number> => {
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
-        "tenant-id": "6338400",
         "cookie": auth.cookie,
         "Referer":
           "https://ajax.webuntis.com/WebUntis/embedded.do?showSidebar=false",
@@ -185,7 +183,6 @@ export const getTimeTable = async (
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
-        "tenant-id": "6338400",
         "cookie": auth.cookie,
         "Referer":
           "https://ajax.webuntis.com/WebUntis/embedded.do?showSidebar=false",
@@ -237,7 +234,6 @@ export const getPeriodContent = async (
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
-        "tenant-id": "6338400",
         "x-webuntis-api-school-year-id": "16",
         "cookie": auth.cookie,
         "Referer":
