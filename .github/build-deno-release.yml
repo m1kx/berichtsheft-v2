@@ -1,0 +1,40 @@
+name: Build and Release Deno Executable
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Build Deno executable
+        run: deno task build
+
+      - name: Archive the executable
+        run: |
+          mkdir -p release
+          mv berichtsheft release/
+          tar -czvf release/berichtsheft.tar.gz -C release berichtsheft
+        shell: bash
+
+      - name: Upload executable to Release
+        id: upload-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/berichtsheft.tar.gz
+          tag_name: ${{ github.ref_name }}
+          release_name: "Release ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
