@@ -11,5 +11,7 @@
   "ai_method": "gpt",
   "ai_prompt": "Schreibe maximal zwei simple Stichpunkte anhand der folgenden Ticket Beschreibung. Die Stichpunkte sollen beinhalten, was in dem Ticket zu tun war. Schreibe in der vergangenheit, aus sicht eines azubis, der das Ticket bearbeitet hat. Lasse füllwörter wie 'Ich habe' und 'habe ich' weg. Beutze keinen Punkt am ende des Stickpunktes. Gebe mir nur die Zwei Stichpunkte im Format '- <1.Stichpunkt>\\n- <2.Stichpunkt>', sonst nichts. Ticket Beschreibung:\n{DESCRIPTION}",
   "ah_username": "",
-  "ah_password": ""
+  "ah_password": "",
+  "absence_id": "",
+  "absence_apikey": ""
 }

@@ -22,6 +22,7 @@ import {
 import { formatDateRange, getCurrentWeek } from "./src/util/date.ts";
 import chalk from "npm:chalk";
 import { checkbox } from "npm:@inquirer/prompts";
+import { getAbsences } from "./src/api/absence.ts";
 
 try {
   await Deno.lstat("config.json");
@@ -135,6 +136,11 @@ for (const week of selectedWeeks) {
     `Scraping week number and deleting data for ${week.from.toLocaleDateString()}`,
   );
 
+  const absences = await getAbsences({
+    from: week.from,
+    to: week.to,
+  });
+
   const allActivity = new Map<string, Data>();
   const commits = await getCommitsForUser(user.uuid, {
     from: week.from,
@@ -173,7 +179,24 @@ for (const week of selectedWeeks) {
     });
   }
 
-  const finalString = (await Promise.all(
+  let totalHoursLost = 0;
+  let finalString = absences.absences.map((absence) => {
+    totalHoursLost += absence.hours;
+    return `${
+      (new Date(absence.date)).toLocaleDateString()
+    }:${absence.hours === 4 ? ' 1/2 Tag' : ''} ${absence.reason}\n`;
+  }).join("");
+
+  finalString += absences.holidays.map((holiday) => {
+    totalHoursLost += holiday.hours;
+    return `${
+      (new Date(holiday.date)).toLocaleDateString()
+    }:${holiday.hours === 4 ? ' 1/2 Tag' : ''} ${holiday.reason}\n`;
+  }).join("");
+
+  finalString += finalString === "" ? "" : "\n";
+
+  finalString += (await Promise.all(
     Array.from(allActivity.entries()).map(async ([key, data]) => {
       const activity = await ticketDescriptionToActivity(
         data.issueDescription,
@@ -193,6 +216,7 @@ for (const week of selectedWeeks) {
     weekNumberAndCookie.number ?? "10",
     weekNumberAndCookie.cookies,
     encodeURI(formatTextWithHTML(finalString)),
+    `${40 - totalHoursLost}:00`,
   );
 }
 

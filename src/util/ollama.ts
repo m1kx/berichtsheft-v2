@@ -23,14 +23,20 @@ export const ticketDescriptionToActivity = async (
     .replaceAll('"', "");
 
   if (config.ai_method === "ollama") {
-    console.log("🤖 Using openai llama3.2 to generate description...", description.length);
+    console.log(
+      "🤖 Using openai llama3.2 to generate description...",
+      description.length,
+    );
     const response = await ollama.generate({
       model: "llama3.2",
       prompt,
     });
     return response.response;
   } else if (config.ai_method === "gpt") {
-    console.log("🤖 Using openai gpt-4o-mini to generate description...", description.length);
+    console.log(
+      "🤖 Using openai gpt-4o-mini to generate description...",
+      description.length,
+    );
     const client = new OpenAI({
       apiKey: config.openai_key,
     });

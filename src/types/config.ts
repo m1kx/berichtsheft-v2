@@ -12,4 +12,6 @@ export interface Config {
   ai_prompt: string;
   ah_username: string;
   ah_password: string;
+  absence_id: string;
+  absence_apikey: string;
 }

@@ -125,7 +125,7 @@ export const auth = async (): Promise<Auth> => {
 const getElementId = async (auth: Auth): Promise<number> => {
   const response = await fetch(
     `https://ajax.webuntis.com/WebUntis/api/public/timetable/weekly/pageconfig?type=5&date=${
-      (new Date()).toLocaleDateString('de-DE').split(".").reverse().join("-")
+      (new Date()).toLocaleDateString("de-DE").split(".").reverse().join("-")
     }&isMyTimetableSelected=true`,
     {
       "headers": {

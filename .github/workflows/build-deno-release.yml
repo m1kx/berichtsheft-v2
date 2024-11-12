@@ -29,7 +29,8 @@ jobs:
         run: |
           mkdir -p release
           mv berichtsheft release/
-          tar -czvf release/berichtsheft.tar.gz -C release berichtsheft
+          mv config.example.json release/
+          tar -czvf release/berichtsheft.tar.gz -C release berichtsheft config.example.json
         shell: bash
 
       - name: Upload executable to Release
