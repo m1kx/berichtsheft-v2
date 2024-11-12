@@ -194,7 +194,7 @@ export const getTimeTable = async (
   );
   const json = await response.json();
   const days = new Map();
-  const periods: Period[] = json?.data?.result?.data?.elementPeriods["35347"] ??
+  const periods: Period[] = json?.data?.result?.data?.elementPeriods[elementId] ??
     null;
   if (!periods || periods.length === 0) {
     return null;
@@ -237,7 +237,7 @@ export const getPeriodContent = async (
         "x-webuntis-api-school-year-id": "16",
         "cookie": auth.cookie,
         "Referer":
-          "https://ajax.webuntis.com/timetable-students-my/2024-09-16/modal/details/2037903/false/35347/5/2024-09-20T09%3A30%3A00%2B02%3A00/2024-09-20T10%3A15%3A00%2B02%3A00/class-register",
+          `https://ajax.webuntis.com/timetable-students-my/2024-09-16/modal/details/2037903/false/${elementId}/5/2024-09-20T09%3A30%3A00%2B02%3A00/2024-09-20T10%3A15%3A00%2B02%3A00/class-register`,
         "Referrer-Policy": "strict-origin-when-cross-origin",
       },
       "body": null,

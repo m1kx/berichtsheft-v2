@@ -12,7 +12,7 @@ export const applyActivityToNumber = async (
   if (Deno.args[0] === "noupload") {
     console.log("Not uploading data, saving local...");
     await Deno.writeTextFile(
-      `${date.toLocaleDateString()}-${Deno.args[1] ?? "log"}.log`,
+      `${date.toLocaleDateString("de-DE")}-${Deno.args[1] ?? "log"}.log`,
       decodeURI(content),
     );
     console.log(chalk.green("Data saved!"));

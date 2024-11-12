@@ -78,9 +78,9 @@ for (const week of selectedWeeks) {
 
   console.log(
     `Fetching data for Week from [${
-      chalk.bgBlueBright(week.from.toLocaleDateString())
+      chalk.bgBlueBright(week.from.toLocaleDateString("de-DE"))
     }] to [${
-      chalk.bgBlueBright(week.to.toLocaleDateString())
+      chalk.bgBlueBright(week.to.toLocaleDateString("de-DE"))
     }] Number: [${weekNumberAndCookie.number}]`,
   );
 
@@ -130,7 +130,7 @@ for (const week of selectedWeeks) {
 
     let text = absences.holidays.map((holiday) => {
       return `${
-        (new Date(holiday.date)).toLocaleDateString()
+        (new Date(holiday.date)).toLocaleDateString("de-DE")
       }: ${holiday.reason}\n`;
     }).join("");
 
@@ -150,7 +150,7 @@ for (const week of selectedWeeks) {
   }
 
   console.log(
-    `Scraping week number and deleting data for ${week.from.toLocaleDateString()}`,
+    `Scraping week number and deleting data for ${week.from.toLocaleDateString("de-DE")}`,
   );
 
   const allActivity = new Map<string, Data>();
@@ -194,14 +194,14 @@ for (const week of selectedWeeks) {
   let totalHoursLost = 0;
   let finalString = absences.absences.map((absence) => {
     totalHoursLost += absence.hours;
-    return `${(new Date(absence.date)).toLocaleDateString()}:${
+    return `${(new Date(absence.date)).toLocaleDateString("de-DE")}:${
       absence.hours === 4 ? " 1/2 Tag" : ""
     } ${absence.reason}\n`;
   }).join("");
 
   finalString += absences.holidays.map((holiday) => {
     totalHoursLost += holiday.hours;
-    return `${(new Date(holiday.date)).toLocaleDateString()}:${
+    return `${(new Date(holiday.date)).toLocaleDateString("de-DE")}:${
       holiday.hours === 4 ? " 1/2 Tag" : ""
     } ${holiday.reason}\n`;
   }).join("");
