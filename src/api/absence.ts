@@ -55,7 +55,7 @@ export const getAbsences = async (
         return {
           ...day,
           reason: reasonsMap[absence.reasonId] ?? "?",
-          hours: 8 * (1 - day.value),
+          hours: 8 * day.value,
         };
       }),
     );
