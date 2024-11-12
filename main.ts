@@ -87,10 +87,19 @@ for (const week of selectedWeeks) {
   const untisAuth = await auth();
   const days = await getTimeTable(untisAuth, week.from);
 
-  if (!days) {
+  const [absences, isSchool] = await getAbsences({
+    from: week.from,
+    to: week.to,
+  });
+
+  if (!days && !isSchool) {
     console.log(chalk.yellow("Status: No school week detected"));
   } else {
-    console.log(chalk.green("Status: School week detected"));
+    console.log(
+      chalk.green(
+        `Status: School week detected ${isSchool ? "from absence" : ""}`,
+      ),
+    );
     const allSubjectsInWeek: PeriodInfo[] = [];
     let minutes = 0;
 
@@ -119,7 +128,15 @@ for (const week of selectedWeeks) {
       continue;
     }
 
-    const text = allSubjectsInWeek.map((info) => {
+    let text = absences.holidays.map((holiday) => {
+      return `${
+        (new Date(holiday.date)).toLocaleDateString()
+      }: ${holiday.reason}\n`;
+    }).join("");
+
+    text += text === "" ? "" : "\n";
+
+    text += allSubjectsInWeek.map((info) => {
       return `Fach: ${info.name}\nInhalt: ${info.content}\n`;
     }).join("\n");
 
@@ -135,11 +152,6 @@ for (const week of selectedWeeks) {
   console.log(
     `Scraping week number and deleting data for ${week.from.toLocaleDateString()}`,
   );
-
-  const absences = await getAbsences({
-    from: week.from,
-    to: week.to,
-  });
 
   const allActivity = new Map<string, Data>();
   const commits = await getCommitsForUser(user.uuid, {
@@ -182,16 +194,16 @@ for (const week of selectedWeeks) {
   let totalHoursLost = 0;
   let finalString = absences.absences.map((absence) => {
     totalHoursLost += absence.hours;
-    return `${
-      (new Date(absence.date)).toLocaleDateString()
-    }:${absence.hours === 4 ? ' 1/2 Tag' : ''} ${absence.reason}\n`;
+    return `${(new Date(absence.date)).toLocaleDateString()}:${
+      absence.hours === 4 ? " 1/2 Tag" : ""
+    } ${absence.reason}\n`;
   }).join("");
 
   finalString += absences.holidays.map((holiday) => {
     totalHoursLost += holiday.hours;
-    return `${
-      (new Date(holiday.date)).toLocaleDateString()
-    }:${holiday.hours === 4 ? ' 1/2 Tag' : ''} ${holiday.reason}\n`;
+    return `${(new Date(holiday.date)).toLocaleDateString()}:${
+      holiday.hours === 4 ? " 1/2 Tag" : ""
+    } ${holiday.reason}\n`;
   }).join("");
 
   finalString += finalString === "" ? "" : "\n";

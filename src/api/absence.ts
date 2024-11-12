@@ -27,7 +27,7 @@ const absenceIo = new AbsenceIO({
 
 export const getAbsences = async (
   timeRange: TimeRange,
-): Promise<AbsenceData> => {
+): Promise<[AbsenceData, boolean]> => {
   const data: AbsenceData = {
     holidays: [],
     absences: [],
@@ -55,7 +55,8 @@ export const getAbsences = async (
         return {
           ...day,
           reason: reasonsMap[absence.reasonId] ?? "?",
-          hours: 8 * day.value,
+          // maybe add later: offtime = worktime
+          hours: 0,
         };
       }),
     );
@@ -63,12 +64,18 @@ export const getAbsences = async (
       absence.days.filter((day) => !day.weekend && day.holiday).map((day) => {
         return {
           ...day,
-          reason: "Feiertag/Arbeitsfreier Tag",
+          reason: "Feiertag",
           hours: day.halfHoliday ? 4 : 8,
         };
       }),
     );
   }
 
-  return data;
+  for (const day of data.absences.concat(data.holidays)) {
+    if (day.reason === "Berufsschule") {
+      return [data, true];
+    }
+  }
+
+  return [data, false];
 };
