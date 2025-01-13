@@ -32,6 +32,9 @@ export const getAbsences = async (
     holidays: [],
     absences: [],
   };
+  console.log(
+    `absences from ${timeRange.from.toISOString()} to ${timeRange.to.toISOString()}`,
+  );
   const absences = await absenceIo.api.absence.retrieveAbsences({
     filter: {
       assignedToId: config.absence_id,
@@ -39,9 +42,9 @@ export const getAbsences = async (
         // @ts-ignore api can handle...
         "$in": Object.keys(reasonsMap),
       },
-      start: { "$lte": timeRange.to.toISOString() },
-      end: { "$gte": timeRange.from.toISOString() },
     },
+    start: timeRange.from.toISOString(),
+    end: timeRange.to.toISOString(),
     limit: 100,
     skip: 0,
   });
@@ -61,7 +64,11 @@ export const getAbsences = async (
       }),
     );
     data.holidays = data.holidays.concat(
-      absence.days.filter((day) => !day.weekend && day.holiday).map((day) => {
+      absence.days.filter((day) =>
+        (!day.weekend && day.holiday) &&
+        (new Date(day.date) > timeRange.from &&
+          new Date(day.date) < timeRange.to)
+      ).map((day) => {
         return {
           ...day,
           reason: "Feiertag",

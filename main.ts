@@ -92,7 +92,7 @@ for (const week of selectedWeeks) {
     to: week.to,
   });
 
-  if (!days && !isSchool) {
+  if (!days || !isSchool) {
     console.log(chalk.yellow("Status: No school week detected"));
   } else {
     console.log(
@@ -150,7 +150,9 @@ for (const week of selectedWeeks) {
   }
 
   console.log(
-    `Scraping week number and deleting data for ${week.from.toLocaleDateString("de-DE")}`,
+    `Scraping week number and deleting data for ${
+      week.from.toLocaleDateString("de-DE")
+    }`,
   );
 
   const allActivity = new Map<string, Data>();

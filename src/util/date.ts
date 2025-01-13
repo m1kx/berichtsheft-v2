@@ -7,29 +7,54 @@ export const getMidnightDate = (): string => {
 };
 
 export const getLastWeeks = (amount: number): TimeRange[] => {
-  const lastWeeks = [];
-
+  const workWeeks: TimeRange[] = [];
   const now = new Date();
-  const currentWeekStartDate = new Date();
-  currentWeekStartDate.setDate(now.getDate() - (now.getDay() - 1) - 7);
-  currentWeekStartDate.setHours(0, 0, 0, 0);
+
+  let currentDate = new Date(now);
+
+  currentDate = new Date(Date.UTC(
+    currentDate.getUTCFullYear(),
+    currentDate.getUTCMonth(),
+    currentDate.getUTCDate(),
+    0,
+    0,
+    0,
+    0,
+  ));
+
+  while (currentDate.getUTCDay() !== 5) {
+    currentDate.setUTCDate(currentDate.getUTCDate() - 1);
+  }
+
+  currentDate = new Date(Date.UTC(
+    currentDate.getUTCFullYear(),
+    currentDate.getUTCMonth(),
+    currentDate.getUTCDate(),
+    22,
+    0,
+    0,
+    0,
+  ));
 
   for (let i = 0; i < amount; i++) {
-    const from = new Date();
-    from.setMonth(currentWeekStartDate.getMonth());
-    from.setDate(currentWeekStartDate.getDate() - 7 * i);
-    from.setHours(0, 0, 0, 0);
-    const to = new Date();
-    to.setMonth(from.getMonth());
-    to.setDate(from.getDate() + 4);
-    to.setHours(23, 0, 0, 0);
-    const week: TimeRange = {
-      from,
-      to,
-    };
-    lastWeeks.push(week);
+    const endDate = new Date(currentDate);
+
+    const startDate = new Date(currentDate);
+    while (startDate.getUTCDay() !== 1) {
+      startDate.setUTCDate(startDate.getUTCDate() - 1);
+    }
+
+    startDate.setUTCHours(0, 0, 0, 0);
+
+    workWeeks.push({
+      from: new Date(startDate),
+      to: new Date(endDate),
+    });
+
+    currentDate.setUTCDate(currentDate.getUTCDate() - 7);
   }
-  return lastWeeks;
+
+  return workWeeks;
 };
 
 export const getCurrentWeek = (): TimeRange => {

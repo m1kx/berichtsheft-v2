@@ -194,8 +194,9 @@ export const getTimeTable = async (
   );
   const json = await response.json();
   const days = new Map();
-  const periods: Period[] = json?.data?.result?.data?.elementPeriods[elementId] ??
-    null;
+  const periods: Period[] =
+    json?.data?.result?.data?.elementPeriods[elementId] ??
+      null;
   if (!periods || periods.length === 0) {
     return null;
   }
