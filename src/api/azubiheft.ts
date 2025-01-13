@@ -75,7 +75,7 @@ export const getWeekNumberForDateAndCookie = async (date: Date) => {
     browser = await puppeteer.launch();
   } catch (_error) {
     const installCommand = new Deno.Command("npx", {
-      args: ["puppeteer@latest", "browsers", "install", "chrome"],
+      args: ["puppeteer@23.7.1", "browsers", "install", "chrome"],
     });
     console.log("Puppeteer not found, installing...");
     await installCommand.output();
