@@ -60,8 +60,6 @@ interface Data {
   issueHeading: string;
 }
 
-console.log(user.uuid);
-
 if (Deno.args.includes("checkout")) {
   const today = getTodaysDate();
   const commits = await getCommitsForUser(user.uuid!, today);
