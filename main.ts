@@ -4,13 +4,21 @@ import {
 } from "./src/api/azubiheft.ts";
 import {
   getCommitsForUser,
+  getPullRequestForCommit,
   getPullrequestsForUser,
   getUser,
 } from "./src/api/bitbucket.ts";
-import { getIssueDescription, getTicketHeading } from "./src/api/jira.ts";
+import {
+  getIssueDescription,
+  getTicketHeading,
+  getTicketStatus,
+} from "./src/api/jira.ts";
 import { loadConfig, writeConfig } from "./src/util/config.ts";
 
-import { formatTextWithHTML } from "./src/util/format.ts";
+import {
+  commitMessageToTicket,
+  formatTextWithHTML,
+} from "./src/util/format.ts";
 import { getLastWeeks, getTodaysDate } from "./src/util/date.ts";
 import { ticketDescriptionToActivity } from "./src/util/ollama.ts";
 import {
@@ -23,6 +31,8 @@ import { formatDateRange, getCurrentWeek } from "./src/util/date.ts";
 import chalk from "npm:chalk";
 import { checkbox } from "npm:@inquirer/prompts";
 import { getAbsences } from "./src/api/absence.ts";
+import { getStatusEmoji } from "./src/util/status.ts";
+import { config } from "./src/util/config.ts";
 
 try {
   await Deno.lstat("config.json");
@@ -48,6 +58,53 @@ if (!user.uuid) {
 interface Data {
   issueDescription: string;
   issueHeading: string;
+}
+
+console.log(user.uuid);
+
+if (Deno.args.includes("checkout")) {
+  const today = getTodaysDate();
+  const commits = await getCommitsForUser(user.uuid!, today);
+  const filteredCommits = [
+    ...new Map(
+      commits.map(
+        (commit) => [commitMessageToTicket(commit.message ?? ""), commit],
+      ),
+    ).values(),
+  ];
+
+  for (const commit of filteredCommits) {
+    const ticket = commitMessageToTicket(commit.message ?? "");
+    if (!ticket) {
+      continue;
+    }
+
+    if (!commit.hash) {
+      continue;
+    }
+    const pr = (await Promise.all(config.bb_repos!.map((repo) =>
+      getPullRequestForCommit(commit.hash!, repo)
+    ))).filter((val) =>
+      val !== null
+    );
+    if (!pr[0] || !pr[0].created_on) {
+      continue;
+    }
+
+    const status = await getTicketStatus(ticket);
+    const emoji = getStatusEmoji(
+      (new Date(pr[0].created_on) > today.from) ? "Heute erstellt" : status,
+    );
+
+    if (!emoji) {
+      continue;
+    }
+
+    const ticketHeading = await getTicketHeading(ticket);
+
+    console.log(`${ticket}: ${ticketHeading} ${emoji}`);
+  }
+  Deno.exit();
 }
 
 const weeks = getLastWeeks(20);
@@ -210,14 +267,24 @@ for (const week of selectedWeeks) {
 
   finalString += finalString === "" ? "" : "\n";
 
-  finalString += (await Promise.all(
-    Array.from(allActivity.entries()).map(async ([key, data]) => {
+  if (config.ai_method === "gpt") {
+    finalString += (await Promise.all(
+      Array.from(allActivity.entries()).map(async ([key, data]) => {
+        const activity = await ticketDescriptionToActivity(
+          data.issueDescription,
+        );
+        return `${key}: ${data.issueHeading}\n${activity}\n`;
+      }),
+    )).join("");
+  } else {
+    let finalString = "";
+    for (const [key, data] of allActivity.entries()) {
       const activity = await ticketDescriptionToActivity(
         data.issueDescription,
       );
-      return `${key}: ${data.issueHeading}\n${activity}\n`;
-    }),
-  )).join("");
+      finalString += `${key}: ${data.issueHeading}\n${activity}\n`;
+    }
+  }
 
   if (finalString === "") {
     console.log(chalk.red("Status: No Data"));

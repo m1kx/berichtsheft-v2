@@ -1,6 +1,7 @@
 import { config } from "./config.ts";
 import ollama from "npm:ollama";
 import OpenAI from "jsr:@openai/openai";
+import process from "node:process";
 
 export interface OllamaResponse {
   model: string;
@@ -24,14 +25,20 @@ export const ticketDescriptionToActivity = async (
 
   if (config.ai_method === "ollama") {
     console.log(
-      "🤖 Using openai llama3.2 to generate description...",
-      description.length,
+      `🤖 Using ollama ${config.ollama_model} to generate description with length of ${description.length}...`,
     );
-    const response = await ollama.generate({
-      model: "llama3.2",
-      prompt,
+    const message = { role: "user", content: prompt };
+    const response = await ollama.chat({
+      model: config.ollama_model ?? "llama3.2",
+      messages: [message],
+      stream: true,
     });
-    return response.response;
+    let fullResponse = "";
+    for await (const part of response) {
+      fullResponse += part.message.content;
+      process.stdout.write(part.message.content);
+    }
+    return fullResponse;
   } else if (config.ai_method === "gpt") {
     console.log(
       "🤖 Using openai gpt-4o-mini to generate description...",

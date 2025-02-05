@@ -49,7 +49,6 @@ export const getAbsences = async (
     skip: 0,
   });
   for (const absence of absences.data) {
-    console.log(reasonsMap[absence.reasonId], absence.reasonId);
     data.absences = data.absences.concat(
       absence.days.filter((day) =>
         !day.weekend && !day.holiday && new Date(day.date) >= timeRange.from &&

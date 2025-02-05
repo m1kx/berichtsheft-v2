@@ -81,3 +81,42 @@ export const getCommitsForUser = async (
   );
   return allCommits;
 };
+
+const getPullRequestById = async (
+  id: number,
+  repo: string,
+): Promise<Pullrequest> => {
+  const url = encodeURI(
+    `https://api.bitbucket.org/2.0/repositories/check24/${repo}/pullrequests/${id}`,
+  );
+  const response = await fetch(
+    url,
+    {
+      headers: getBaseHeaders(),
+    },
+  );
+
+  const json = await response.json();
+  return json as Pullrequest;
+};
+
+export const getPullRequestForCommit = async (
+  commitId: string,
+  repo: string,
+): Promise<Pullrequest | null> => {
+  const url = encodeURI(
+    `https://api.bitbucket.org/2.0/repositories/check24/${repo}/commit/${commitId}/pullrequests?fields=values.id`,
+  );
+  const response = await fetch(
+    url,
+    {
+      headers: getBaseHeaders(),
+    },
+  );
+  const json = await response.json();
+  if (!json?.values?.[0]?.id) {
+    return null;
+  }
+
+  return await getPullRequestById(json?.values?.[0]?.id, repo);
+};

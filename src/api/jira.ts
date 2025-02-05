@@ -26,6 +26,24 @@ const cleanupString = (str: string): string => {
   return str.trim();
 };
 
+export const getTicketStatus = async (ticket: string): Promise<string> => {
+  const response = await fetch(
+    `${config.jira_base_url}/rest/api/2/issue/${ticket}`,
+    {
+      method: "GET",
+      headers: {
+        ...getBaseHeaders(),
+        "Accept": "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) return "";
+
+  const data: any = (await response.json()) as any;
+  return cleanupString(data.fields.status.name);
+};
+
 export const getIssueDescription = async (ticket: string): Promise<string> => {
   if (ticket.includes("/")) {
     ticket = ticket.split("/").at(-1)!;

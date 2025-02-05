@@ -20,3 +20,7 @@ export const formatTextWithHTML = (text: string): string => {
   // Join the formatted lines with newlines
   return formattedLines.join("\n");
 };
+
+export const commitMessageToTicket = (message: string): string | null => {
+  return message.split(":")?.[0] ?? null;
+};

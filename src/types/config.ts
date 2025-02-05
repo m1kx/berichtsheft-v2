@@ -9,6 +9,7 @@ export interface Config {
   untis_password: string;
   openai_key: string;
   ai_method: string;
+  ollama_model?: string;
   ai_prompt: string;
   ah_username: string;
   ah_password: string;
