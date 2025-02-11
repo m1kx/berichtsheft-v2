@@ -38,7 +38,9 @@ export const getTicketStatus = async (ticket: string): Promise<string> => {
     },
   );
 
-  if (!response.ok) return "";
+  if (!response.ok) {
+    return "";
+  }
 
   const data: any = (await response.json()) as any;
   return cleanupString(data.fields.status.name);

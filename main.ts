@@ -60,6 +60,12 @@ interface Data {
   issueHeading: string;
 }
 
+interface Message {
+  ticket: string;
+  ticketHeading: string;
+  emoji: string;
+}
+
 if (Deno.args.includes("checkout")) {
   const today = getTodaysDate();
   const commits = await getCommitsForUser(user.uuid!, today);
@@ -70,6 +76,8 @@ if (Deno.args.includes("checkout")) {
       ),
     ).values(),
   ];
+
+  const messages: Array<Message> = [];
 
   for (const commit of filteredCommits) {
     const ticket = commitMessageToTicket(commit.message ?? "");
@@ -91,7 +99,7 @@ if (Deno.args.includes("checkout")) {
 
     const status = await getTicketStatus(ticket);
     const emoji = getStatusEmoji(
-      (new Date(pr[0].created_on) > today.from) ? "Heute erstellt" : status,
+      status,
     );
 
     if (!emoji) {
@@ -100,8 +108,26 @@ if (Deno.args.includes("checkout")) {
 
     const ticketHeading = await getTicketHeading(ticket);
 
-    console.log(`${ticket}: ${ticketHeading} ${emoji}`);
+    messages.push({
+      ticket,
+      ticketHeading,
+      emoji,
+    });
   }
+
+  messages.sort((a, b) => {
+    if (a.emoji === b.emoji) {
+      return a.ticket.localeCompare(b.ticket);
+    }
+    return a.emoji.localeCompare(b.emoji);
+  });
+
+  for (const message of messages) {
+    console.log(
+      `${message.ticket}: ${message.ticketHeading} ${message.emoji}`,
+    );
+  }
+
   Deno.exit();
 }
 
