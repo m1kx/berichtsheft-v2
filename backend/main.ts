@@ -214,7 +214,9 @@ if (Deno.args.includes("serve")) {
           continue;
         }
         const ticketHeading = await getTicketHeading(ticket);
-        if (ticketHeading === "") continue;
+        if (ticketHeading === "") {
+          continue;
+        }
         messages.push({
           ticket,
           ticketHeading,
