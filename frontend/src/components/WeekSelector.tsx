@@ -15,6 +15,15 @@ const WeekSelector = (): ReactElement | null => {
     const workWeeks: TimeRange[] = [];
     const now = new Date();
 
+    const currentWeekStart = new Date(now);
+    while (currentWeekStart.getUTCDay() !== 1) {
+      currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() - 1);
+    }
+    currentWeekStart.setUTCHours(0, 0, 0, 0);
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setUTCDate(currentWeekStart.getUTCDate() + 4);
+    currentWeekEnd.setUTCHours(22, 0, 0, 0);
+
     let currentDate = new Date(now);
 
     currentDate = new Date(
@@ -62,6 +71,12 @@ const WeekSelector = (): ReactElement | null => {
 
       currentDate.setUTCDate(currentDate.getUTCDate() - 7);
     }
+
+    // Add the current week at the beginning of the weeks array
+    workWeeks.unshift({
+      from: new Date(currentWeekStart),
+      to: new Date(currentWeekEnd),
+    });
 
     return workWeeks;
   }, []);
