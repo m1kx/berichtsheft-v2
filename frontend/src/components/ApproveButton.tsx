@@ -1,5 +1,6 @@
 "use client";
 
+import { useLogStore } from "@/stores/logStore";
 import { useResultStore } from "@/stores/resultStore";
 import { useWeekStore } from "@/stores/weekStore";
 import { faCheck, faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +12,7 @@ const ApproveButton = (): ReactElement => {
 
   const resultStore = useResultStore((state) => state);
   const weekStore = useWeekStore((state) => state);
+  const logStore = useLogStore((state) => state);
 
   const approve = async () => {
     if (!resultStore.resultText) {
@@ -18,6 +20,8 @@ const ApproveButton = (): ReactElement => {
     }
 
     setIsLoading(true);
+
+    logStore.addLog("Stating approval...");
     const response = await fetch("http://localhost:8000/approve", {
       method: "POST",
       body: JSON.stringify(Object.fromEntries(resultStore.resultText)),
@@ -25,20 +29,29 @@ const ApproveButton = (): ReactElement => {
         "Content-Type": "application/json",
       },
     });
-    if (!response.ok) {
-      setIsLoading(false);
-      resultStore.removeAll();
-      weekStore.setWeeks([]);
-      return;
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (reader) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value);
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() || "";
+      for (const part of parts) {
+        if (part.startsWith("data:")) {
+          const msg = part.replace("data:", "").trim();
+          logStore.addLog(msg);
+        }
+      }
     }
-    await response.json();
     setIsLoading(false);
     resultStore.removeAll();
     weekStore.setWeeks([]);
   };
 
   return (
-    <button disabled={isLoading} onClick={() => approve()}>
+    <button disabled={isLoading} onClick={approve}>
       {isLoading ? (
         <FontAwesomeIcon spin icon={faSpinner} />
       ) : (

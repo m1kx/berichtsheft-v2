@@ -15,6 +15,7 @@ import type { TimeRange } from "./types/time.ts";
 import chalk from "npm:chalk";
 import { ticketDescriptionToActivity } from "./util/ollama.ts";
 import type { User } from "./types/bitbucket.ts";
+import { formatDate } from "./util/date.ts";
 
 interface Data {
   issueDescription: string;
@@ -72,8 +73,10 @@ const getTextForSchoolWeek = async (
 export const getTextForWeek = async (
   user: User,
   week: TimeRange,
+  onStatusUpdate?: (msg: string) => void,
 ): Promise<string> => {
   if (!user.uuid) {
+    onStatusUpdate?.("User uuid missing");
     return "";
   }
 
@@ -81,45 +84,47 @@ export const getTextForWeek = async (
     week.from,
     false,
   );
-
-  console.log(
-    `Fetching data for Week from [${
-      chalk.bgBlueBright(week.from.toLocaleDateString("de-DE"))
-    }] to [${
-      chalk.bgBlueBright(week.to.toLocaleDateString("de-DE"))
-    }] Number: [${weekNumberAndCookie.number}]`,
-  );
+  const weekInfo = `Fetching data for Week from ${formatDate(week.from)} to ${
+    formatDate(week.to)
+  } Number: [${weekNumberAndCookie.number}]`;
+  console.log(weekInfo);
+  onStatusUpdate?.(weekInfo);
 
   const untisAuth = await auth();
+  onStatusUpdate?.("Timetable authentication completed.");
   const days = await getTimeTable(untisAuth, week.from);
+  onStatusUpdate?.("Timetable fetched.");
 
   const [absences, isSchool] = await getAbsences({
     from: week.from,
     to: week.to,
   });
+  onStatusUpdate?.("Absence data retrieved.");
 
   if (!days || !isSchool) {
+    const noSchool = "No school week detected";
     console.log(chalk.yellow("Status: No school week detected"));
+    onStatusUpdate?.(noSchool);
   } else {
-    console.log(
-      chalk.green(
-        `Status: School week detected ${isSchool ? "from absence" : ""}`,
-      ),
-    );
-    return await getTextForSchoolWeek(days!, untisAuth, absences) ?? "";
+    const schoolDetected = `School week detected ${
+      isSchool ? "from absence" : ""
+    }`;
+    console.log(chalk.green(`Status: ${schoolDetected}`));
+    onStatusUpdate?.(schoolDetected);
+    return (await getTextForSchoolWeek(days, untisAuth, absences)) ?? "";
   }
 
-  console.log(
-    `Scraping week number and deleting data for ${
-      week.from.toLocaleDateString("de-DE")
-    }`,
-  );
+  const scrapingMsg = `Scraping week number for ${formatDate(week.from)}`;
+  console.log(scrapingMsg);
+  onStatusUpdate?.(scrapingMsg);
 
   const allActivity = new Map<string, Data>();
   const commits = await getCommitsForUser(user.uuid, {
     from: week.from,
     to: week.to,
   });
+  onStatusUpdate?.("Commits fetched.");
+
   for (const commit of commits) {
     const match = commit.rendered.message.raw.match(/([A-Z]+-\d+)/);
     const result = match ? match[0] : null;
@@ -131,15 +136,17 @@ export const getTextForWeek = async (
       issueDescription: description,
     });
   }
+  onStatusUpdate?.("Processed commit activity.");
 
   const pullrequests = await getPullrequestsForUser(user.uuid, {
     from: week.from,
     to: week.to,
   });
-
   if (!pullrequests?.values) {
+    onStatusUpdate?.("No pull requests found. Exiting.");
     Deno.exit();
   }
+  onStatusUpdate?.("Pull requests fetched.");
 
   for (const pullrequest of pullrequests.values) {
     const match = pullrequest.title.match(/([A-Z]+-\d+)/);
@@ -152,6 +159,7 @@ export const getTextForWeek = async (
       issueDescription: description,
     });
   }
+  onStatusUpdate?.("Processed pull request activity.");
 
   let totalHoursLost = 0;
   let finalString = absences.absences.map((absence) => {
@@ -170,6 +178,8 @@ export const getTextForWeek = async (
 
   finalString += finalString === "" ? "" : "\n";
 
+  onStatusUpdate?.("Gathering ticket activity details...");
+
   if (config.ai_method === "gpt") {
     finalString += (await Promise.all(
       Array.from(allActivity.entries()).map(async ([key, data]) => {
@@ -180,19 +190,23 @@ export const getTextForWeek = async (
       }),
     )).join("");
   } else {
-    let finalString = "";
+    let tmpString = "";
     for (const [key, data] of allActivity.entries()) {
-      const activity = await ticketDescriptionToActivity(
-        data.issueDescription,
-      );
-      finalString += `${key}: ${data.issueHeading}\n${activity}\n`;
+      const activity = await ticketDescriptionToActivity(data.issueDescription);
+      tmpString += `${key}: ${data.issueHeading}\n${activity}\n`;
     }
+    finalString += tmpString;
   }
 
   if (finalString === "") {
-    console.log(chalk.red("Status: No Data"));
+    const noDataMsg = "No Data";
+    console.log(chalk.red(`Status: ${noDataMsg}`));
+    onStatusUpdate?.(noDataMsg);
     return "";
   }
 
+  const completionMsg = "Completed processing week data.";
+  console.log(chalk.green(`Status: ${completionMsg}`));
+  onStatusUpdate?.(completionMsg);
   return finalString;
 };
