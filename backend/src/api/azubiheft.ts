@@ -68,11 +68,16 @@ const extractNumber = (text: string) => {
   return match ? match[0] : null; // Returns the number or null if no match
 };
 
-export const getWeekNumberForDateAndCookie = async (date: Date) => {
+export const getWeekNumberForDateAndCookie = async (
+  date: Date,
+  shouldDelete: boolean,
+) => {
   const fmtDate = formatDateToYYYYMMDD(date);
   let browser;
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
   } catch (_error) {
     const installCommand = new Deno.Command("npx", {
       args: ["puppeteer@23.7.1", "browsers", "install", "chrome"],
@@ -94,7 +99,7 @@ export const getWeekNumberForDateAndCookie = async (date: Date) => {
     `https://www.azubiheft.de/Azubi/Tagesbericht.aspx?Datum=${fmtDate}&T=1730815306864A`,
   );
   const heading = await page.$eval("#lbl_Datum", (el) => el.innerText);
-  if (Deno.args[0] !== "noupload") {
+  if (shouldDelete) {
     await page.$$eval('[data-wb="divWB20"]', (els) => {
       const el = els[els.length - 1];
       if (el.innerText !== "") {

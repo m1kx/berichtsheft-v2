@@ -1,0 +1,18 @@
+.container {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.weekContainer {
+  cursor: pointer;
+  user-select: none;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #5c5c5c;
+
+  &.selected {
+    background-color: rgb(97, 133, 103);
+  }
+}

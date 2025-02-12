@@ -9,7 +9,7 @@ interface AbsenceDayEntry extends AbsenceDay {
   hours: number;
 }
 
-interface AbsenceData {
+export interface AbsenceData {
   holidays: AbsenceDayEntry[];
   absences: AbsenceDayEntry[];
 }
@@ -51,7 +51,8 @@ export const getAbsences = async (
   for (const absence of absences.data) {
     data.absences = data.absences.concat(
       absence.days.filter((day) =>
-        !day.weekend && !day.holiday && new Date(day.date) >= timeRange.from &&
+        !day.weekend && !day.holiday &&
+        new Date(day.date) >= timeRange.from &&
         new Date(day.date) <= timeRange.to
       ).map((day) => {
         return {

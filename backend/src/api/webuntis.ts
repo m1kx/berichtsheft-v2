@@ -1,12 +1,12 @@
 import { config } from "../util/config.ts";
 import setCookie from "npm:set-cookie-parser";
 
-interface Auth {
+export interface Auth {
   cookie: string;
   token: string;
 }
 
-interface Period {
+export interface Period {
   date: number;
   startTime: number;
   endTime: number;
@@ -89,7 +89,7 @@ export const auth = async (): Promise<Auth> => {
     `JSESSIONID=${cookie.JSESSIONID.value}; schoolname=${cookie.schoolname.value}; Tenant-Id=${
       cookie["Tenant-Id"].value
     }";`;
-  //console.log(cookie)
+
   const tokenResponse = await fetch(
     "https://ajax.webuntis.com/WebUntis/api/token/new",
     {
@@ -125,7 +125,9 @@ export const auth = async (): Promise<Auth> => {
 const getElementId = async (auth: Auth): Promise<number> => {
   const response = await fetch(
     `https://ajax.webuntis.com/WebUntis/api/public/timetable/weekly/pageconfig?type=5&date=${
-      (new Date()).toLocaleDateString("de-DE").split(".").reverse().join("-")
+      (new Date()).toLocaleDateString("de-DE").split(".").reverse().join(
+        "-",
+      )
     }&isMyTimetableSelected=true`,
     {
       "headers": {
@@ -254,7 +256,10 @@ export const getPeriodContent = async (
         json.calendarEntries[0]?.teachers[0]?.longName ?? "-"
       }`,
       date: formatDateTime(period.date, period.startTime),
-      minutesTaken: getMinutesBetweenTimes(period.startTime, period.endTime),
+      minutesTaken: getMinutesBetweenTimes(
+        period.startTime,
+        period.endTime,
+      ),
     };
   }
   for (const entry of json.calendarEntries) {
@@ -267,7 +272,10 @@ export const getPeriodContent = async (
         entry?.teachers[0]?.longName ?? ""
       }`,
       date: formatDateTime(period.date, period.startTime),
-      minutesTaken: getMinutesBetweenTimes(period.startTime, period.endTime),
+      minutesTaken: getMinutesBetweenTimes(
+        period.startTime,
+        period.endTime,
+      ),
     };
   }
   return null;
