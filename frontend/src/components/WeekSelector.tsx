@@ -72,7 +72,6 @@ const WeekSelector = (): ReactElement | null => {
       currentDate.setUTCDate(currentDate.getUTCDate() - 7);
     }
 
-    // Add the current week at the beginning of the weeks array
     workWeeks.unshift({
       from: new Date(currentWeekStart),
       to: new Date(currentWeekEnd),
@@ -96,6 +95,14 @@ const WeekSelector = (): ReactElement | null => {
     );
   };
 
+  const getWeekNumber = (week: TimeRange): number => {
+    const baseDate = new Date(Date.UTC(2024, 6, 29, 0, 0, 0, 0));
+    const diffInDays =
+      (week.from.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24);
+    const weekDiff = Math.floor(diffInDays / 7);
+    return weekDiff + 1;
+  };
+
   const formatDate = (date: Date) =>
     date.toISOString().split("T")[0].split("-").reverse().join(".");
 
@@ -109,6 +116,7 @@ const WeekSelector = (): ReactElement | null => {
           onClick={() => toggleWeek(week)}
           key={index}
         >
+          <div className={styles.weekNumber}>{getWeekNumber(week)}</div>
           <span>
             {formatDate(week.from)}-
             <br />
