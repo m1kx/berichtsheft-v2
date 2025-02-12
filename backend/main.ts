@@ -228,9 +228,16 @@ if (Deno.args.includes("serve")) {
           ? a.ticket.localeCompare(b.ticket)
           : a.emoji.localeCompare(b.emoji)
       );
-      return new Response(JSON.stringify(messages), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          messages: messages.map((message) =>
+            `${message.ticket}: ${message.ticketHeading} ${message.emoji}`
+          ),
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     return new Response(null, { status: 404, headers: corsHeaders });

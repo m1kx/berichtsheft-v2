@@ -16,12 +16,14 @@
   margin: 0 auto;
   padding: 10px;
   border-radius: 10px;
+  user-select: all;
 }
 
 .logEntry {
   color: rgb(115, 115, 115);
   position: relative;
   padding: 3px 0;
+  text-wrap: nowrap;
 }
 
 .logEntry:not(:last-child) {

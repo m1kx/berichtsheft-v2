@@ -16,8 +16,28 @@ const SubmitButton = (): ReactElement | null => {
   const weeks = useWeekStore((state) => state.weeks);
   const logStore = useLogStore((state) => state);
 
+  const fetchCheckout = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    const response = await fetch("http://localhost:8000/checkout");
+    const data = await response.json();
+
+    resultStore.setResultText("checkout", data.messages.join("\n"));
+
+    setIsLoading(false);
+  };
+
   if (weeks.length === 0) {
-    return <div className={styles.weekHint}>bitte wochen auswählen</div>;
+    return (
+      <div className={styles.weekHint}>
+        bitte wochen auswählen oder{" "}
+        <a onClick={fetchCheckout} className={styles.checkoutLink}>
+          {isLoading ? "..." : "checkout"}
+        </a>
+      </div>
+    );
   }
 
   const submit = async () => {
