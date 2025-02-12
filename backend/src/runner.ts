@@ -63,9 +63,28 @@ const getTextForSchoolWeek = async (
 
   text += text === "" ? "" : "\n";
 
-  text += allSubjectsInWeek.map((info) => {
-    return `Fach: ${info.name}\nInhalt: ${info.content}\n`;
-  }).join("\n");
+  const grouped = allSubjectsInWeek.reduce((acc, info) => {
+    (acc[info.weekday] = acc[info.weekday] || []).push(info);
+    return acc;
+  }, {} as Record<string, PeriodInfo[]>);
+
+  const weekdayOrder = [
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag",
+    "Samstag",
+    "Sonntag",
+  ];
+  for (const day of weekdayOrder) {
+    if (grouped[day]) {
+      text += `--- ${day} ---\n`;
+      text += grouped[day].map((info) => {
+        return `Fach: ${info.name}\nInhalt: ${info.content}\n`;
+      }).join("") + "\n";
+    }
+  }
 
   return text;
 };

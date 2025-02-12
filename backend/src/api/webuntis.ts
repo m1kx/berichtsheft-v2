@@ -18,6 +18,7 @@ export interface PeriodInfo {
   name: string;
   date: string;
   minutesTaken: number;
+  weekday: string;
 }
 
 const formatDateTime = (date: number, time: number): string => {
@@ -50,6 +51,23 @@ const getMinutesBetweenTimes = (startTime: number, endTime: number): number => {
   const startTotalMinutes = startHour * 60 + startMinute;
   const endTotalMinutes = endHour * 60 + endMinute;
   return endTotalMinutes - startTotalMinutes;
+};
+
+const getWeekdayName = (dateNumber: number): string => {
+  const year = Math.floor(dateNumber / 10000);
+  const month = Math.floor((dateNumber % 10000) / 100);
+  const day = dateNumber % 100;
+  const date = new Date(year, month - 1, day);
+  const weekdays = [
+    "Sonntag",
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag",
+    "Samstag",
+  ];
+  return weekdays[date.getDay()];
 };
 
 export const auth = async (): Promise<Auth> => {
@@ -260,6 +278,7 @@ export const getPeriodContent = async (
         period.startTime,
         period.endTime,
       ),
+      weekday: getWeekdayName(period.date),
     };
   }
   for (const entry of json.calendarEntries) {
@@ -276,6 +295,7 @@ export const getPeriodContent = async (
         period.startTime,
         period.endTime,
       ),
+      weekday: getWeekdayName(period.date),
     };
   }
   return null;
