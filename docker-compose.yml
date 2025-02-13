@@ -4,6 +4,8 @@ services:
     ports:
       - "8000:8000"
     restart: always
+    environment:
+      - CRON=0 10 * * 2
 
   frontend:
     build: ./frontend

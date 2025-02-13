@@ -40,4 +40,4 @@ RUN deno install --allow-scripts
 
 COPY . .
 
-CMD [ "run", "--allow-all", "main.ts", "serve" ]
+CMD [ "run", "--allow-all", "--unstable-cron", "main.ts", "serve" ]

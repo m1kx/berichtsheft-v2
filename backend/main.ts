@@ -17,6 +17,7 @@ import type { TimeRange } from "./src/types/time.ts";
 import { getTextForWeek } from "./src/runner.ts";
 import { applyActivityToNumber } from "./src/api/azubiheft.ts";
 import { getWeekNumberForDateAndCookie } from "./src/api/azubiheft.ts";
+import { getLastWeeks } from "./src/util/date.ts";
 
 try {
   await Deno.lstat("config.json");
@@ -39,15 +40,24 @@ if (!user.uuid) {
   throw new Error("Couldn't fetch bitbucket user account. Wrong api key?");
 }
 
-interface Data {
-  issueDescription: string;
-  issueHeading: string;
-}
-
-interface Message {
-  ticket: string;
-  ticketHeading: string;
-  emoji: string;
+const cron = Deno.env.get("CRON");
+if (cron) {
+  console.log(`Scheduling cron: ${cron}`);
+  Deno.cron("addentry", cron, async () => {
+    const lastWeek = getLastWeeks(1)[0];
+    console.log(lastWeek);
+    const text = await getTextForWeek(user, lastWeek);
+    const weekNumberAndCookie = await getWeekNumberForDateAndCookie(
+      lastWeek.from,
+      true,
+    );
+    await applyActivityToNumber(
+      lastWeek.from,
+      weekNumberAndCookie.number ?? "10",
+      weekNumberAndCookie.cookies,
+      encodeURI(formatTextWithHTML(text)),
+    );
+  });
 }
 
 if (Deno.args.includes("serve")) {
