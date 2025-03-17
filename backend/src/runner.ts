@@ -163,7 +163,7 @@ export const getTextForWeek = async (
   });
   if (!pullrequests?.values) {
     onStatusUpdate?.("No pull requests found. Exiting.");
-    Deno.exit();
+    return "";
   }
   onStatusUpdate?.("Pull requests fetched.");
 
