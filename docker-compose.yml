@@ -1,14 +1,16 @@
 services:
   backend:
-    build: ./backend
+    image: ghcr.io/m1kx/backend:latest
     ports:
       - "8000:8000"
     restart: always
     environment:
       - CRON=0 10 * * 2
+    volumes:
+      - ./backend/config.json:/app/config.json
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/m1kx/frontend:latest
     ports:
       - "3000:3000"
     restart: always
