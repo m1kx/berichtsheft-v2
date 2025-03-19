@@ -142,7 +142,7 @@ export const getTextForWeek = async (
     from: week.from,
     to: week.to,
   });
-  onStatusUpdate?.("Commits fetched.");
+  onStatusUpdate?.(`${commits.length} commits fetched.`);
 
   for (const commit of commits) {
     const match = commit.rendered.message.raw.match(/([A-Z]+-\d+)/);
@@ -161,14 +161,10 @@ export const getTextForWeek = async (
     from: week.from,
     to: week.to,
   });
-  if (!pullrequests?.values) {
-    onStatusUpdate?.("No pull requests found. Exiting.");
-    return "";
-  }
   onStatusUpdate?.("Pull requests fetched.");
 
-  for (const pullrequest of pullrequests.values) {
-    const match = pullrequest.title.match(/([A-Z]+-\d+)/);
+  for (const pullrequest of pullrequests) {
+    const match = pullrequest.title?.match(/([A-Z]+-\d+)/);
     const result = match ? match[0] : null;
     if (!result || allActivity.has(result)) continue;
     const heading = await getTicketHeading(result);
