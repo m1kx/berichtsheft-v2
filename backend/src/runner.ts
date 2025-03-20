@@ -61,6 +61,12 @@ const getTextForSchoolWeek = async (
     }: ${holiday.reason}\n`;
   }).join("");
 
+  const sickLeaves = absences.absences.filter((absence) => {
+    return absence.reason.includes("Krankheit");
+  }).map((absence) => {
+    return new Date(absence.date).toLocaleDateString("de-DE");
+  });
+
   text += text === "" ? "" : "\n";
 
   const grouped = allSubjectsInWeek.reduce((acc, info) => {
@@ -80,6 +86,14 @@ const getTextForSchoolWeek = async (
   for (const day of weekdayOrder) {
     if (grouped[day]) {
       text += `--- ${day} ---\n`;
+      if (
+        sickLeaves.includes(
+          new Date(grouped[day][0].date).toLocaleDateString("de-DE"),
+        )
+      ) {
+        text += "(Krank an diesem Tag)\n";
+      }
+
       text += grouped[day].map((info) => {
         return `Fach: ${info.name}\nInhalt: ${info.content}\n`;
       }).join("") + "\n";
