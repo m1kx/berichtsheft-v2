@@ -25,7 +25,10 @@ const SubmitButton = (): ReactElement | null => {
     const response = await fetch("http://localhost:8000/checkout");
     const data = await response.json();
 
-    resultStore.setResultText("checkout", data.messages.join("\n"));
+    resultStore.setResultText("checkout", {
+      finalString: data.messages.join("\n"),
+      totalHoursLost: 0,
+    });
 
     setIsLoading(false);
   };
