@@ -13,7 +13,7 @@ import {
 import { formatDate, getTodaysDate } from "./src/util/date.ts";
 import { getStatusEmoji } from "./src/util/status.ts";
 import { config } from "./src/util/config.ts";
-import type { TimeRange } from "./src/types/time.ts";
+import type { TimeRange, WeekReport } from "./src/types/time.ts";
 import { getTextForWeek } from "./src/runner.ts";
 import { applyActivityToNumber } from "./src/api/azubiheft.ts";
 import { getWeekNumberForDateAndCookie } from "./src/api/azubiheft.ts";
@@ -46,7 +46,7 @@ if (cron) {
   Deno.cron("addentry", cron, async () => {
     const lastWeek = getLastWeeks(1)[0];
     console.log(lastWeek);
-    const text = await getTextForWeek(user, lastWeek);
+    const response = await getTextForWeek(user, lastWeek);
     const weekNumberAndCookie = await getWeekNumberForDateAndCookie(
       lastWeek.from,
       true,
@@ -55,7 +55,8 @@ if (cron) {
       lastWeek.from,
       weekNumberAndCookie.number ?? "10",
       weekNumberAndCookie.cookies,
-      encodeURI(formatTextWithHTML(text)),
+      encodeURI(formatTextWithHTML(response.finalString)),
+      `${40 - response.totalHoursLost}:00`,
     );
   });
 }
@@ -99,7 +100,10 @@ if (Deno.args.includes("serve")) {
           controller.enqueue(
             encoder.encode("data: Starting processing...\n\n"),
           );
-          const responses = new Map<string, string>();
+          const responses = new Map<
+            string,
+            WeekReport
+          >();
           for (
             const week of selectedWeeks.map((w) => ({
               from: new Date(w.from),
@@ -109,10 +113,13 @@ if (Deno.args.includes("serve")) {
             controller.enqueue(encoder.encode(
               `data: Processing week starting ${formatDate(week.from)}...\n\n`,
             ));
-            const text = await getTextForWeek(user, week, (msg: string) => {
+            const response = await getTextForWeek(user, week, (msg: string) => {
               controller.enqueue(encoder.encode(`data: ${msg}\n\n`));
             });
-            responses.set(week.from.toISOString(), text);
+            responses.set(week.from.toISOString(), {
+              finalString: response.finalString,
+              totalHoursLost: response.totalHoursLost,
+            });
             controller.enqueue(encoder.encode(
               `data: Completed week ${formatDate(week.from)}\n\n`,
             ));
@@ -160,8 +167,15 @@ if (Deno.args.includes("serve")) {
               weekFrom,
               weekNumberAndCookie.number ?? "10",
               weekNumberAndCookie.cookies,
-              encodeURI(formatTextWithHTML(value as string)),
-              undefined,
+              encodeURI(
+                formatTextWithHTML(
+                  (value as WeekReport).finalString,
+                ),
+              ),
+              `${
+                40 -
+                (value as WeekReport).totalHoursLost
+              }:00`,
               (msg: string) => {
                 controller.enqueue(encoder.encode(`data: ${msg}\n\n`));
               },

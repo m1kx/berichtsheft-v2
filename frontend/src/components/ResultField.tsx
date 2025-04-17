@@ -19,9 +19,13 @@ const ResultField = (): ReactElement | null => {
           key={key}
           name=""
           id=""
-          value={resultStore.resultText?.get(key) ?? ""}
+          value={resultStore.resultText?.get(key)?.finalString ?? ""}
           onChange={(e) =>
-            resultStore.setResultText(key, e.currentTarget.value)
+            resultStore.setResultText(key, {
+              finalString: e.currentTarget.value,
+              totalHoursLost:
+                resultStore.resultText?.get(key)?.totalHoursLost ?? 0,
+            })
           }
           className={styles.area}
         ></textarea>

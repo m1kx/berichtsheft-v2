@@ -11,7 +11,7 @@ import {
   type Period,
   type PeriodInfo,
 } from "./api/webuntis.ts";
-import type { TimeRange } from "./types/time.ts";
+import type { TimeRange, WeekReport } from "./types/time.ts";
 import chalk from "npm:chalk";
 import { ticketDescriptionToActivity } from "./util/ollama.ts";
 import type { User } from "./types/bitbucket.ts";
@@ -107,10 +107,13 @@ export const getTextForWeek = async (
   user: User,
   week: TimeRange,
   onStatusUpdate?: (msg: string) => void,
-): Promise<string> => {
+): Promise<WeekReport> => {
   if (!user.uuid) {
     onStatusUpdate?.("User uuid missing");
-    return "";
+    return {
+      finalString: "",
+      totalHoursLost: 0,
+    };
   }
 
   const weekNumberAndCookie = await getWeekNumberForDateAndCookie(
@@ -144,7 +147,11 @@ export const getTextForWeek = async (
     }`;
     console.log(chalk.green(`Status: ${schoolDetected}`));
     onStatusUpdate?.(schoolDetected);
-    return (await getTextForSchoolWeek(days, untisAuth, absences)) ?? "";
+    return {
+      finalString: (await getTextForSchoolWeek(days, untisAuth, absences)) ??
+        "",
+      totalHoursLost: 0,
+    };
   }
 
   const scrapingMsg = `Scraping week number for ${formatDate(week.from)}`;
@@ -192,16 +199,16 @@ export const getTextForWeek = async (
 
   let totalHoursLost = 0;
   let finalString = absences.absences.map((absence) => {
-    totalHoursLost += absence.hours;
+    totalHoursLost += absence.reason.includes("Krankheit") ? 8 : absence.hours;
     return `${(new Date(absence.date)).toLocaleDateString("de-DE")}:${
       absence.hours === 4 ? " 1/2 Tag" : ""
     } ${absence.reason}\n`;
   }).join("");
 
   finalString += absences.holidays.map((holiday) => {
-    totalHoursLost += holiday.hours;
+    totalHoursLost += holiday.halfHoliday ? 4 : 8;
     return `${(new Date(holiday.date)).toLocaleDateString("de-DE")}:${
-      holiday.hours === 4 ? " 1/2 Tag" : ""
+      holiday.halfHoliday ? " 1/2 Tag" : ""
     } ${holiday.reason}\n`;
   }).join("");
 
@@ -231,11 +238,17 @@ export const getTextForWeek = async (
     const noDataMsg = "No Data";
     console.log(chalk.red(`Status: ${noDataMsg}`));
     onStatusUpdate?.(noDataMsg);
-    return "";
+    return {
+      finalString: "",
+      totalHoursLost: 0,
+    };
   }
 
   const completionMsg = "Completed processing week data.";
   console.log(chalk.green(`Status: ${completionMsg}`));
   onStatusUpdate?.(completionMsg);
-  return finalString;
+  return {
+    finalString,
+    totalHoursLost,
+  };
 };

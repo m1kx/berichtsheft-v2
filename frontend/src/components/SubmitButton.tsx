@@ -5,6 +5,7 @@ import { useWeekStore } from "@/stores/weekStore";
 import { ReactElement, useState } from "react";
 
 import { useLogStore } from "@/stores/logStore";
+import { WeekReport } from "@/types/api";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styles from "./SubmitButton.module.scss";
@@ -63,12 +64,12 @@ const SubmitButton = (): ReactElement | null => {
           try {
             const data = JSON.parse(msg);
             Object.entries(data).forEach(([key, value]) => {
-              resultStore.setResultText(
-                key,
-                `${
+              resultStore.setResultText(key, {
+                finalString: `${
                   resultStore.resultText ? `${resultStore.resultText}\n` : ""
-                }${value}`
-              );
+                }${(value as WeekReport).finalString}`,
+                totalHoursLost: (value as WeekReport).totalHoursLost,
+              });
             });
           } catch {
             logStore.addLog(msg);
