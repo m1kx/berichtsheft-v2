@@ -15,20 +15,27 @@ const ResultField = (): ReactElement | null => {
   return (
     <>
       {Array.from(resultStore.resultText.keys()).map((key) => (
-        <textarea
-          key={key}
-          name=""
-          id=""
-          value={resultStore.resultText?.get(key)?.finalString ?? ""}
-          onChange={(e) =>
-            resultStore.setResultText(key, {
-              finalString: e.currentTarget.value,
-              totalHoursLost:
-                resultStore.resultText?.get(key)?.totalHoursLost ?? 0,
-            })
-          }
-          className={styles.area}
-        ></textarea>
+        <div className={styles.row} key={key}>
+          {resultStore.resultText?.get(key)?.totalHoursLost && (
+            <h4>
+              working hours:{" "}
+              {40 - (resultStore.resultText?.get(key)?.totalHoursLost ?? 0)}h
+            </h4>
+          )}
+          <textarea
+            name=""
+            id=""
+            value={resultStore.resultText?.get(key)?.finalString ?? ""}
+            onChange={(e) =>
+              resultStore.setResultText(key, {
+                finalString: e.currentTarget.value,
+                totalHoursLost:
+                  resultStore.resultText?.get(key)?.totalHoursLost ?? 0,
+              })
+            }
+            className={styles.area}
+          ></textarea>
+        </div>
       ))}
     </>
   );

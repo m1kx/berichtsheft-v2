@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --allow-all --watch main.ts",
+    "dev": "deno run --allow-all --watch main.ts serve noupload",
     "start": "deno run --allow-all main.ts noupload",
     "configType": "npx make_types -i src/types/config.ts config.json Config",
     "build": "deno compile --unstable --allow-env --allow-read --allow-write --allow-net --allow-run --allow-sys -o berichtsheft main.ts"
