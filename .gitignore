@@ -1,7 +1,2 @@
-*.log
-deno.lock
+.DS_Store
 .vscode/
-**/.DS_Store
-berichtsheft
-config.json
-node_modules/

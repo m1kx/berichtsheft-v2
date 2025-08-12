@@ -1,17 +1,21 @@
 {
   "tasks": {
-    "dev": "deno run --allow-all --watch main.ts",
+    "dev": "deno run --allow-all --watch main.ts serve noupload",
     "start": "deno run --allow-all main.ts noupload",
     "configType": "npx make_types -i src/types/config.ts config.json Config",
     "build": "deno compile --unstable --allow-env --allow-read --allow-write --allow-net --allow-run --allow-sys -o berichtsheft main.ts"
   },
   "imports": {
+    "@ai-sdk/openai": "npm:@ai-sdk/openai@^1.1.14",
     "@inquirer/prompts": "npm:@inquirer/prompts@^7.0.1",
     "@std/assert": "jsr:@std/assert@1",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
+    "@openai/openai": "jsr:@openai/openai@^4.83.0",
     "absence.io": "npm:absence.io@^2.2.9",
     "chalk": "npm:chalk@^5.3.0",
-    "puppeteer": "npm:puppeteer@^23.7.1"
+    "llm-scraper": "npm:llm-scraper@^1.5.1",
+    "puppeteer": "npm:puppeteer@^23.7.1",
+    "zod": "npm:zod@^3.24.2"
   },
   "nodeModulesDir": "auto"
 }

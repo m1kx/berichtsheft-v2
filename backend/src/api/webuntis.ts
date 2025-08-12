@@ -1,12 +1,12 @@
 import { config } from "../util/config.ts";
 import setCookie from "npm:set-cookie-parser";
 
-interface Auth {
+export interface Auth {
   cookie: string;
   token: string;
 }
 
-interface Period {
+export interface Period {
   date: number;
   startTime: number;
   endTime: number;
@@ -18,6 +18,7 @@ export interface PeriodInfo {
   name: string;
   date: string;
   minutesTaken: number;
+  weekday: string;
 }
 
 const formatDateTime = (date: number, time: number): string => {
@@ -50,6 +51,23 @@ const getMinutesBetweenTimes = (startTime: number, endTime: number): number => {
   const startTotalMinutes = startHour * 60 + startMinute;
   const endTotalMinutes = endHour * 60 + endMinute;
   return endTotalMinutes - startTotalMinutes;
+};
+
+const getWeekdayName = (dateNumber: number): string => {
+  const year = Math.floor(dateNumber / 10000);
+  const month = Math.floor((dateNumber % 10000) / 100);
+  const day = dateNumber % 100;
+  const date = new Date(year, month - 1, day);
+  const weekdays = [
+    "Sonntag",
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag",
+    "Samstag",
+  ];
+  return weekdays[date.getDay()];
 };
 
 export const auth = async (): Promise<Auth> => {
@@ -89,7 +107,7 @@ export const auth = async (): Promise<Auth> => {
     `JSESSIONID=${cookie.JSESSIONID.value}; schoolname=${cookie.schoolname.value}; Tenant-Id=${
       cookie["Tenant-Id"].value
     }";`;
-  //console.log(cookie)
+
   const tokenResponse = await fetch(
     "https://ajax.webuntis.com/WebUntis/api/token/new",
     {
@@ -125,7 +143,9 @@ export const auth = async (): Promise<Auth> => {
 const getElementId = async (auth: Auth): Promise<number> => {
   const response = await fetch(
     `https://ajax.webuntis.com/WebUntis/api/public/timetable/weekly/pageconfig?type=5&date=${
-      (new Date()).toLocaleDateString("de-DE").split(".").reverse().join("-")
+      (new Date()).toLocaleDateString("de-DE").split(".").reverse().join(
+        "-",
+      )
     }&isMyTimetableSelected=true`,
     {
       "headers": {
@@ -254,7 +274,11 @@ export const getPeriodContent = async (
         json.calendarEntries[0]?.teachers[0]?.longName ?? "-"
       }`,
       date: formatDateTime(period.date, period.startTime),
-      minutesTaken: getMinutesBetweenTimes(period.startTime, period.endTime),
+      minutesTaken: getMinutesBetweenTimes(
+        period.startTime,
+        period.endTime,
+      ),
+      weekday: getWeekdayName(period.date),
     };
   }
   for (const entry of json.calendarEntries) {
@@ -267,7 +291,11 @@ export const getPeriodContent = async (
         entry?.teachers[0]?.longName ?? ""
       }`,
       date: formatDateTime(period.date, period.startTime),
-      minutesTaken: getMinutesBetweenTimes(period.startTime, period.endTime),
+      minutesTaken: getMinutesBetweenTimes(
+        period.startTime,
+        period.endTime,
+      ),
+      weekday: getWeekdayName(period.date),
     };
   }
   return null;

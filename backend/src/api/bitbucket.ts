@@ -23,18 +23,17 @@ export const getUser = async (): Promise<User> => {
 export const getPullrequestsForUser = async (
   uuid: string,
   timeRange: TimeRange,
-): Promise<Pullrequest> => {
-  const url = encodeURI(
-    `https://api.bitbucket.org/2.0/pullrequests/${uuid}?state=OPEN,MERGED&q=updated_on >= ${timeRange.from.toISOString()} AND updated_on <= ${timeRange.to.toISOString()}`,
-  );
-  const response = await fetch(
-    url,
-    {
-      headers: getBaseHeaders(),
-    },
-  );
-  const json = await response.json();
-  return json as Pullrequest;
+): Promise<Pullrequest[]> => {
+  const allPullrequests: Pullrequest[] = [];
+  for (const repo of config.bb_repos!) {
+    const pullrequests: Pullrequest[] = await getPaginatedResults(
+      `https://api.bitbucket.org/2.0/repositories/check24/${repo}/pullrequests/${uuid}?state=OPEN,MERGED&q=updated_on >= ${timeRange.from.toISOString()} AND updated_on <= ${timeRange.to.toISOString()}`,
+      timeRange.from,
+    );
+    allPullrequests.push(...pullrequests);
+  }
+
+  return allPullrequests;
 };
 
 const getPaginatedResults = async (

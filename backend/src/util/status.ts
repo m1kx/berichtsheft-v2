@@ -5,6 +5,7 @@ const mappings = new Map(
     ["Merged", ":merge:"],
     ["PM Reviewed", ":merge:"],
     ["Geschlossen", ":merge:"],
+    ["Ready for Release", ":merge:"],
     ["Heute erstellt", ":pullrequest:"],
   ],
 );
